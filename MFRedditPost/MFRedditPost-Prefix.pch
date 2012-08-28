@@ -1,0 +1,10 @@
+//
+//  Copyright (c) 2012 AppStair LLC. All rights reserved.
+//  http://appstair.com
+//
+
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+
+#define UIAppDelegate   (AppDelegate *)[[UIApplication sharedApplication] delegate]
+
