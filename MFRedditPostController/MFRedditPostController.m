@@ -2,9 +2,7 @@
 //  Copyright (c) 2012 Foley Productions LLC. All rights reserved.
 //  http://appstair.com
 //
-#warning your imgur api key.
 
-#define IMGUR_KEY           @"YOUR_API_HERE"
 #define CELL_PADDING        ((UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) ? 62 : 20)
 
 #import "MFRedditPostController.h"

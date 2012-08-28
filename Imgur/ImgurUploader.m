@@ -11,6 +11,9 @@
 #import "NSData+Base64.h"
 #import <dispatch/dispatch.h>
 
+#warning your imgur api key.
+#define IMGUR_KEY           @"YOUR_API_HERE"
+
 @implementation ImgurUploader
 
 @synthesize delegate;
@@ -28,7 +31,7 @@
 		
 		dispatch_async(main,^{
 			
-			NSString *uploadCall = [NSString stringWithFormat:@"key=%@&image=%@",@"0c6d4ce7b2f04b350573826b28fbe321",imageB64];
+			NSString *uploadCall = [NSString stringWithFormat:@"key=%@&image=%@",IMGUR_KEY,imageB64];
 			
 			NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://api.imgur.com/2/upload"]];
 			[request setHTTPMethod:@"POST"];
