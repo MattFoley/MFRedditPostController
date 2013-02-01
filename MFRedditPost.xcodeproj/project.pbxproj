@@ -13,6 +13,7 @@
 		2B91CFDA15A1F291007993FD /* ASColor+Hex.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B91CFAD15A1F291007993FD /* ASColor+Hex.m */; };
 		2B91CFF215A29127007993FD /* sample_thumb.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 2B91CFF015A29127007993FD /* sample_thumb.jpg */; };
 		2B91CFF315A29127007993FD /* sample.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 2B91CFF115A29127007993FD /* sample.jpg */; };
+		3708993C16BB8B9100029FEC /* SSTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3708993B16BB8B9100029FEC /* SSTextView.m */; };
 		6B2CD96D15EC1F2F00315BD6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B2CD96515EC1F2F00315BD6 /* AppDelegate.m */; };
 		6B2CD96E15EC1F2F00315BD6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B2CD96615EC1F2F00315BD6 /* main.m */; };
 		6B2CD96F15EC1F2F00315BD6 /* MainController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6B2CD96815EC1F2F00315BD6 /* MainController.m */; };
@@ -52,6 +53,8 @@
 		2B91CFAD15A1F291007993FD /* ASColor+Hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ASColor+Hex.m"; sourceTree = "<group>"; };
 		2B91CFF015A29127007993FD /* sample_thumb.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = sample_thumb.jpg; path = Resources/sample_thumb.jpg; sourceTree = "<group>"; };
 		2B91CFF115A29127007993FD /* sample.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = sample.jpg; path = Resources/sample.jpg; sourceTree = "<group>"; };
+		3708993A16BB8B9100029FEC /* SSTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SSTextView.h; path = "Placeholder TextView/SSTextView.h"; sourceTree = SOURCE_ROOT; };
+		3708993B16BB8B9100029FEC /* SSTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SSTextView.m; path = "Placeholder TextView/SSTextView.m"; sourceTree = SOURCE_ROOT; };
 		6B2CD96415EC1F2F00315BD6 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		6B2CD96515EC1F2F00315BD6 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		6B2CD96615EC1F2F00315BD6 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -176,6 +179,15 @@
 			path = AppStair;
 			sourceTree = "<group>";
 		};
+		3708993916BB8B7B00029FEC /* Placeholder TextView */ = {
+			isa = PBXGroup;
+			children = (
+				3708993A16BB8B9100029FEC /* SSTextView.h */,
+				3708993B16BB8B9100029FEC /* SSTextView.m */,
+			);
+			name = "Placeholder TextView";
+			sourceTree = "<group>";
+		};
 		6B2CD96315EC1F2F00315BD6 /* MFRedditPost */ = {
 			isa = PBXGroup;
 			children = (
@@ -191,6 +203,7 @@
 		6B2CD97215EC1F5500315BD6 /* MFRedditPostController */ = {
 			isa = PBXGroup;
 			children = (
+				3708993916BB8B7B00029FEC /* Placeholder TextView */,
 				6BCC6D6B15ED2E3300ACAB45 /* Reddit_Envelope_Clear.png */,
 				6BCC6D4015ED2E0100ACAB45 /* Imgur */,
 				6BCC6D4C15ED2E0100ACAB45 /* Loading Alien */,
@@ -360,6 +373,7 @@
 				6BCC6D5D15ED2E0100ACAB45 /* NSString+URLEncoding.m in Sources */,
 				6BCC6D5E15ED2E0100ACAB45 /* NSString+URLEscape.m in Sources */,
 				6BCC6D6015ED2E0100ACAB45 /* AlienProgressView.m in Sources */,
+				3708993C16BB8B9100029FEC /* SSTextView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

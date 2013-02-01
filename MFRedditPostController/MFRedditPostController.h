@@ -5,6 +5,19 @@
 
 #import <UIKit/UIKit.h>
 #import "ImgurUploader.h"
+
+//Set me to 0 to receive notifications and take control of handling success/failure
+#define SHOULD_USE_DEFAULT_ALERTS               1
+
+#define kRedditLoginSuccessNotification         @"reddit.login.succeeded.notification"
+#define kRedditLoginFailededNotification        @"reddit.login.failed.notification"
+
+#define kRedditLinkPostFailededNotification     @"reddit.link.post.failed.notification"
+#define kRedditLinkPostSuccessNotification      @"reddit.link.post.success.notification"
+
+#define kRedditPhotoPostFailededNotification     @"reddit.photo.post.failed.notification"
+#define kRedditPhotoPostSuccessNotification      @"reddit.photo.post.success.notification"
+
 @interface MFRedditPostController : UITableViewController <NSURLConnectionDataDelegate, UITextFieldDelegate, UITextViewDelegate, ImgurUploaderDelegate>
 {
     ImgurUploader *uploader;
@@ -18,5 +31,12 @@
 @property (nonatomic, retain) ImgurUploader *uploader;
 @property (nonatomic, retain) UIProgressView *progressView;
 
+@property (nonatomic, retain) NSString*linkToPost;
+
+- (id)initForPhoto;
+- (id)initForLink:(NSString*)string;
+
+- (void)postLinkToReddit:(NSString*)link;
+- (void)postPhotoToReddit:(NSString*)imgLink;
 
 @end

@@ -27,9 +27,9 @@
 }
 
 - (void)showRedditPost{
-    MFRedditPostController *c = [[MFRedditPostController alloc] init];
-    c.thumbnailImage = [UIImage imageNamed:@"sample_thumb.jpg"];    
-    c.originalImage = [UIImage imageNamed:@"sample.jpg"];
+    MFRedditPostController *c = [[MFRedditPostController alloc] initForLink:@"http://www.notgoogle.com"];
+    //c.thumbnailImage = [UIImage imageNamed:@"sample_thumb.jpg"];
+    //c.originalImage = [UIImage imageNamed:@"sample.jpg"];
     
     UINavigationController *n = [[UINavigationController alloc] initWithRootViewController:c];
     n.modalPresentationStyle = UIModalPresentationFormSheet;

@@ -10,6 +10,7 @@
 #import "ASColor+Hex.h"
 #import "AlienProgressView.h"
 #import "NSURL+ResourceExists.h"
+#import "SSTextView.h"
 
 
 
@@ -18,6 +19,7 @@
 @property (nonatomic, assign) bool shouldEnableLogin;
 @property (nonatomic, assign) bool shouldEnablePost;
 @property (nonatomic, assign) bool loggedIn;
+@property (nonatomic, assign) bool shouldPostPhoto;
 
 @property (nonatomic, assign) CGFloat accountCellHeight;
 @property (nonatomic, retain) UIView *loginCell;
@@ -54,32 +56,9 @@
 static int kSubredditLabelTag = 42;
 static int kLoginButtonTag = 420;
 
-
-@synthesize username        = _username;
-@synthesize password        = _password;
-@synthesize loginCell       = _loginCell;
-@synthesize defaultCell     = _defaultCell;
-@synthesize loginButton     = _loginButton;
-
 @synthesize shouldEnableLogin;
 @synthesize shouldEnablePost;
 @synthesize loggedIn;
-
-@synthesize alien           = _alien;
-@synthesize loginRequest    = _loginRequest;
-@synthesize postRequest     = _postRequest;
-@synthesize modhash         = _modhash;
-@synthesize responseData    = _responseData;
-@synthesize lastLoginTime   = _lastLoginTime;
-
-
-@synthesize accountCellHeight = _accountCellHeight;
-
-@synthesize loginName       = _loginName;
-@synthesize textView        = _textView;
-@synthesize loadingAlert    = _loadingAlert;
-@synthesize originalImage   = _originalImage;
-@synthesize thumbnailImage  = _thumbnailImage;
 
 @synthesize progressView, uploader;
 
@@ -98,6 +77,24 @@ static int kLoginButtonTag = 420;
 }
 
 - (id)init{
+    _shouldPostPhoto = NO;
+    if(self = [super initWithStyle:UITableViewStyleGrouped]){
+        self.title = @"Reddit";
+    }
+    return self;
+}
+
+- (id)initForPhoto{
+    _shouldPostPhoto = YES;
+    if(self = [super initWithStyle:UITableViewStyleGrouped]){
+        self.title = @"Reddit";
+    }
+    return self;
+}
+
+- (id)initForLink:(NSString *)string{
+    _shouldPostPhoto = NO;
+    _linkToPost = string;
     if(self = [super initWithStyle:UITableViewStyleGrouped]){
         self.title = @"Reddit";
     }
@@ -121,12 +118,20 @@ static int kLoginButtonTag = 420;
     self.tableView.scrollEnabled = NO;
 
     // navi buttons
-    UIBarButtonItem *btn;    
+    UIBarButtonItem *btn;
+    if (self.shouldPostPhoto) {
     btn = [[UIBarButtonItem alloc]
            initWithTitle:NSLocalizedString(@"MF_POST", @"")
            style:UIBarButtonItemStyleBordered
            target:self
            action:@selector(uploadToImgur)];
+    }else{
+        btn = [[UIBarButtonItem alloc]
+               initWithTitle:NSLocalizedString(@"MF_POST", @"")
+               style:UIBarButtonItemStyleBordered
+               target:self
+               action:@selector(postLinkToReddit:)];
+    }
     self.navigationItem.rightBarButtonItem = btn;
     [btn release];
     
@@ -224,6 +229,11 @@ static int kLoginButtonTag = 420;
 
 - (void)postPhotoToReddit:(NSString*)imgLink
 {
+    
+    if (![imgLink isKindOfClass:[NSString class]]) {
+        imgLink = imgurString;
+    }
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         [_alien startAnimating];
     });
@@ -239,14 +249,43 @@ static int kLoginButtonTag = 420;
 
     [request setHTTPMethod:@"POST"];
     
-    NSString*httpBody = [NSString stringWithFormat:@"uh=%@&url=%@&kind=link&sr=%@&title=%@&r=%@&api_type=json",self.modhash, @"http://google.com", [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+    NSString*httpBody = [NSString stringWithFormat:@"uh=%@&url=%@&kind=link&sr=%@&title=%@&r=%@&api_type=json",self.modhash, imgLink, [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
     
     
     [request setHTTPBody:[httpBody dataUsingEncoding:NSASCIIStringEncoding]];
     
     self.postRequest = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     [self.postRequest start];
+}
 
+- (void)postLinkToReddit:(NSString*)link
+{
+    
+    if (![link isKindOfClass:[NSString class]]) {
+        link = self.linkToPost;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_alien startAnimating];
+    });
+    
+    NSString *subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    
+    NSString *title = [[NSString alloc]initWithString:self.textView.text];
+    
+    
+    NSString *urlString = [NSString stringWithFormat:@"http://www.reddit.com/api/submit"];
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
+    
+    [request setHTTPMethod:@"POST"];
+    
+    NSString*httpBody = [NSString stringWithFormat:@"uh=%@&url=%@&kind=link&sr=%@&title=%@&r=%@&api_type=json",self.modhash, link, [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+    
+    
+    [request setHTTPBody:[httpBody dataUsingEncoding:NSASCIIStringEncoding]];
+    
+    self.postRequest = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    [self.postRequest start];
 }
 
 - (void)storeCookies{
@@ -267,15 +306,21 @@ static int kLoginButtonTag = 420;
     [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
 }
 
-- (void)loginToReddit
+- (void)loginToRedditWithUserName:(NSString*)username andPassword:(NSString*)password
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [_alien startAnimating];
     });
+    NSString *passwd;
+    NSString *user;
     
-    NSString *user = [[NSString alloc]initWithString:_username.text];
-    NSString *passwd = [[NSString alloc]initWithString:_password.text];
-
+    if ([username isKindOfClass:[NSString class]] && [password isKindOfClass:[NSString class]] ) {
+        user = username;
+        passwd = password;
+    }else{
+        user = [[NSString alloc]initWithString:_username.text];
+        passwd = [[NSString alloc]initWithString:_password.text];
+    }
 
     NSString *urlString = [NSString stringWithFormat:@"http://www.reddit.com/api/login"];
     NSURL *url = [NSURL URLWithString:urlString];
@@ -308,27 +353,82 @@ static int kLoginButtonTag = 420;
         [self storeCookies];
         [self flipBackLogin];
         
+        [self.responseData release];
+        
         self.responseData = nil;
         self.lastLoginTime = [NSDate date];
 
-    }
-    else
-    {
-        [[[[UIAlertView alloc]initWithTitle:@"Login Failed" message:@"Incorrect Username/Password combination, please try again" delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil] autorelease]show];
-        self.modhash = @"";
-        self.lastLoginTime = nil;
+    }else{
+        if (SHOULD_USE_DEFAULT_ALERTS) {
+            [[[[UIAlertView alloc]initWithTitle:@"Login Failed"
+                                        message:@"Incorrect Username/Password combination, please try again"
+                                       delegate:nil
+                              cancelButtonTitle:@"Okay"
+                              otherButtonTitles:nil] autorelease]show];
+        }else{
+            [self sendNotificationNamed:kRedditLoginFailededNotification];
+        }
+            self.modhash = @"";
+            self.lastLoginTime = nil;
     }
 
 }
 
 - (void)postProbablySucceeded:(NSDictionary*)json{
     if ([[[json objectForKey:@"json"]objectForKey:@"data"]objectForKey:@"url"]) {
-        [[[[UIAlertView alloc]initWithTitle:@"Success" message:@"Your post was successfully submitted to Reddit!" delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil] autorelease]show];
+        
+        if (SHOULD_USE_DEFAULT_ALERTS) {
+            [[[[UIAlertView alloc]initWithTitle:@"Success"
+                                        message:@"Your post was successfully submitted to Reddit!"
+                                       delegate:nil
+                              cancelButtonTitle:@"Okay"
+                              otherButtonTitles:nil] autorelease]show];
+        }else{
+            if (self.shouldPostPhoto) {
+                [self sendNotificationNamed:kRedditPhotoPostFailededNotification];
+            }else{
+                [self sendNotificationNamed:kRedditLinkPostFailededNotification];
+            }
+        }
     }else if([[[[[json objectForKey:@"json"]objectForKey:@"errors"]objectAtIndex:0]objectAtIndex:0]isEqualToString:@"RATELIMIT"]){
         
-     [[[[UIAlertView alloc]initWithTitle:@"Rate Limit" message:[NSString stringWithFormat:@"%@", [[[[json objectForKey:@"json"]objectForKey:@"errors"]objectAtIndex:0]objectAtIndex:1]] delegate:nil cancelButtonTitle:@"Shucks." otherButtonTitles:nil] autorelease]show];
+        if (SHOULD_USE_DEFAULT_ALERTS) {
+            [[[[UIAlertView alloc]initWithTitle:@"Rate Limit"
+                                        message:[NSString stringWithFormat:@"%@", [[[[json objectForKey:@"json"]objectForKey:@"errors"]objectAtIndex:0]objectAtIndex:1]]
+                                       delegate:nil
+                              cancelButtonTitle:@"Shucks."
+                              otherButtonTitles:nil] autorelease]show];
+        }else{
+            if (self.shouldPostPhoto) {
+                [self sendNotificationNamed:kRedditPhotoPostFailededNotification];
+            }else{
+                [self sendNotificationNamed:kRedditLinkPostFailededNotification];
+            }
+        }
+   
     }else{
-        [[[[UIAlertView alloc]initWithTitle:@"Error" message:[NSString stringWithFormat:@"That subreddit may not exist, or Reddit may be down, but your image was still uploaded to %@", imgurString] delegate:nil cancelButtonTitle:@"Shucks." otherButtonTitles:nil] autorelease]show];
+        
+        if (SHOULD_USE_DEFAULT_ALERTS) {
+                        if (self.shouldPostPhoto) {
+            [[[[UIAlertView alloc]initWithTitle:@"Error"
+                                        message:[NSString stringWithFormat:@"That subreddit may not exist, or Reddit may be down, but your image was still uploaded to %@", imgurString]
+                                       delegate:nil
+                              cancelButtonTitle:@"Shucks."
+                              otherButtonTitles:nil] autorelease]show];
+                        }else{
+                            [[[[UIAlertView alloc]initWithTitle:@"Error"
+                                                        message:@"That subreddit may not exist, or Reddit may be down, so your link wasn't posted. Sorry."
+                                                       delegate:nil
+                                              cancelButtonTitle:@"Shucks."
+                                              otherButtonTitles:nil] autorelease]show];
+                        }
+        }else{
+            if (self.shouldPostPhoto) {
+                [self sendNotificationNamed:kRedditPhotoPostFailededNotification];
+            }else{
+                [self sendNotificationNamed:kRedditLinkPostFailededNotification];
+            }
+        }
     }
 }
 
@@ -347,7 +447,22 @@ static int kLoginButtonTag = 420;
             [uploader uploadImage:self.originalImage];
         }else{
             [self.progressView setAlpha:0];
-            [[[[UIAlertView alloc]initWithTitle:@"Reddit Error" message:@"That reddit doesn't exist, or Reddit is down." delegate:nil cancelButtonTitle:@"Shucks." otherButtonTitles:nil] autorelease]show];
+            
+            if (SHOULD_USE_DEFAULT_ALERTS) {
+                [[[[UIAlertView alloc]initWithTitle:@"Reddit Error"
+                                            message:@"That reddit doesn't exist, or Reddit is down."
+                                           delegate:nil
+                                  cancelButtonTitle:@"Shucks."
+                                  otherButtonTitles:nil] autorelease]show];
+            }else{
+                
+                if (self.shouldPostPhoto) {
+                    [self sendNotificationNamed:kRedditPhotoPostFailededNotification];
+                }else{
+                    [self sendNotificationNamed:kRedditLinkPostFailededNotification];
+                }
+            }
+            
         }
     }];
 }
@@ -448,7 +563,7 @@ static int kLoginButtonTag = 420;
     [self.loginButton setImage:[UIImage imageNamed:@"loginPressed.png"] forState:UIControlStateHighlighted];
     [self.loginButton.imageView setContentMode:UIViewContentModeScaleAspectFit];
     [self.loginButton setEnabled:NO];
-    [self.loginButton addTarget:self action:@selector(loginToReddit) forControlEvents:UIControlEventTouchUpInside];
+    [self.loginButton addTarget:self action:@selector(loginToRedditWithUserName:andPassword:) forControlEvents:UIControlEventTouchUpInside];
     [self.loginButton setFrame:CGRectMake(edgepadding+(self.tableView.frame.size.width/2-(CELL_PADDING/2+edgepadding+centerPadding)), 20+25, centerPadding*2, 29)];
     [self setupNotifications];
     [_loginCell addSubview:self.loginButton];
@@ -461,8 +576,6 @@ static int kLoginButtonTag = 420;
     CGFloat thumbSize = [self isIpad] ? 100 : 60;
     CGFloat textSzie = [self isIpad] ? 348 : 210;
     
-    UIImageView *_back = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, thumbSize, thumbSize)];
-    _back.image = self.thumbnailImage;
     
     progressView = [[UIProgressView alloc]initWithProgressViewStyle:UIProgressViewStyleBar];
     [progressView setAlpha:.0];
@@ -470,12 +583,25 @@ static int kLoginButtonTag = 420;
     [progressView setFrame:CGRectMake(10, 10+thumbSize, thumbSize, 10)];
     
     [cell.contentView addSubview:progressView];
-    
-    [cell.contentView addSubview:_back];
-    [_back release];
+
+    if (self.shouldPostPhoto) {
+        UIImageView *_back = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, thumbSize, thumbSize)];
+        _back.image = self.thumbnailImage;
+        [cell.contentView addSubview:_back];
+        [_back release];
+    }
     
     if(!self.textView){
-        UITextView *tv = [[UITextView alloc] initWithFrame:CGRectMake(thumbSize + 20, 10, textSzie, thumbSize)];
+        SSTextView *tv;
+        
+        if (self.shouldPostPhoto) {
+            tv = [[SSTextView alloc] initWithFrame:CGRectMake(thumbSize + 20, 10, textSzie, thumbSize)];
+        }else{
+            tv = [[SSTextView alloc] initWithFrame:CGRectMake(10, 10, textSzie+thumbSize+10, thumbSize)];
+        }
+    
+        tv.placeholder = @"Title 0/300";
+
         tv.font = [UIFont systemFontOfSize:16];
         tv.backgroundColor = [UIColor colorWithHex:0xefefef];
         self.textView = tv;
@@ -503,7 +629,7 @@ static int kLoginButtonTag = 420;
         [tvBorder setBackgroundColor:[UIColor colorWithHex:0xefefef]];
         
         UITextField *tv = [[UITextField alloc] initWithFrame:CGRectMake(15, 4, textSize-20, 21)];
-        [tv setPlaceholder:@"/r/subreddit"];
+        [tv setPlaceholder:@"/r/subreddit (ie: 'askreddit' or 'ragecam')"];
         tv.font = [UIFont systemFontOfSize:16];
         [tv setTextAlignment:UITextAlignmentRight];
         [tv setContentHorizontalAlignment:UIControlContentHorizontalAlignmentCenter];
@@ -571,16 +697,33 @@ static int kLoginButtonTag = 420;
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:self.responseData options:NSJSONReadingAllowFragments error:&error];
     NSString*responsestring = [[[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding] autorelease];
     NSLog(@"%@", [responsestring description]);
+    self.responseData = nil;
     
     if (self.responseStatusCode == 200) {
-
+        
         if (connection == _loginRequest) {
             [self loginProbablySucceeded:json];
         }else{
             [self postProbablySucceeded:json];
         }
     }else{
-        [[[[UIAlertView alloc]initWithTitle:@"Error" message:@"Sorry, either we dropped the ball, their servers are down, or you aren't connected to the internet. We just don't know!" delegate:nil cancelButtonTitle:@"Awh, hell." otherButtonTitles:nil] autorelease]show];
+        if (SHOULD_USE_DEFAULT_ALERTS) {
+            [[[[UIAlertView alloc]initWithTitle:@"Error"
+                                        message:@"Sorry, either we dropped the ball, their servers are down, or you aren't connected to the internet. We just don't know!"
+                                       delegate:nil
+                              cancelButtonTitle:@"Awh, hell."
+                              otherButtonTitles:nil] autorelease]show];
+        }else{
+            if (connection == _loginRequest) {
+                [self sendNotificationNamed:kRedditLoginFailededNotification];
+            }else if(self.shouldPostPhoto){
+                [self sendNotificationNamed:kRedditPhotoPostFailededNotification];
+            }else{
+                [self sendNotificationNamed:kRedditLinkPostFailededNotification];
+            }
+        }
+        
+        
     }
     
 }
@@ -615,7 +758,15 @@ static int kLoginButtonTag = 420;
 
 -(void)uploadFailedWithError:(NSError *)error
 {
-	[[[[UIAlertView alloc]initWithTitle:@"Imgur Failue" message:@"Your photo was not uploaded to Imgur, it may be down. Try again later." delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil] autorelease]show];
+    if (SHOULD_USE_DEFAULT_ALERTS) {
+        [[[[UIAlertView alloc]initWithTitle:@"Imgur Failue"
+                                    message:@"Your photo was not uploaded to Imgur, it may be down. Try again later."
+                                   delegate:nil
+                          cancelButtonTitle:@"Okay"
+                          otherButtonTitles:nil] autorelease]show];
+    }else{
+        [self sendNotificationNamed:kRedditPhotoPostFailededNotification];
+    }
 }
 
 -(void)uploadProgressedToPercentage:(CGFloat)percentage
@@ -691,6 +842,13 @@ static int kLoginButtonTag = 420;
 
 - (BOOL)isIpad{
     return (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
+}
+
+#pragma mark Notifications
+
+- (void)sendNotificationNamed:(NSString*)noteName
+{
+    [[NSNotificationCenter defaultCenter]postNotification:noteName];
 }
 
 @end
