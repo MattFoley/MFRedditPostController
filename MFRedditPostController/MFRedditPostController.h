@@ -31,12 +31,17 @@
 @property (nonatomic, retain) ImgurUploader *uploader;
 @property (nonatomic, retain) UIProgressView *progressView;
 
-@property (nonatomic, retain) NSString*linkToPost;
+@property (nonatomic, retain) NSString* subreddit;
+@property (nonatomic, retain) NSString* title;
+
+@property (nonatomic, retain) NSString* linkToPost;
 
 - (id)initForPhoto;
+- (id)initWithImageLink:(NSString*)photoLink;
 - (id)initForLink:(NSString*)string;
 
+- (void)uploadToImgur:(UIImage*)imageToUpload;
+- (void)loginToRedditWithUserName:(NSString*)username andPassword:(NSString*)password;
 - (void)postLinkToReddit:(NSString*)link;
-- (void)postPhotoToReddit:(NSString*)imgLink;
 
 @end

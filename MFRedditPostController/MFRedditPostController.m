@@ -77,14 +77,7 @@ static int kLoginButtonTag = 420;
 }
 
 - (id)init{
-    _shouldPostPhoto = NO;
-    if(self = [super initWithStyle:UITableViewStyleGrouped]){
-        self.title = @"Reddit";
-    }
-    return self;
-}
-
-- (id)initForPhoto{
+    imgurString = nil;
     _shouldPostPhoto = YES;
     if(self = [super initWithStyle:UITableViewStyleGrouped]){
         self.title = @"Reddit";
@@ -92,7 +85,27 @@ static int kLoginButtonTag = 420;
     return self;
 }
 
+- (id)initForPhoto{
+    imgurString = nil;
+    _shouldPostPhoto = YES;
+    if(self = [super initWithStyle:UITableViewStyleGrouped]){
+        self.title = @"Reddit";
+    }
+    return self;
+}
+
+- (id)initWithImageLink:(NSString*)photoLink{
+    _shouldPostPhoto = YES;
+    imgurString = photoLink;
+    
+    if(self = [super initWithStyle:UITableViewStyleGrouped]){
+        self.title = @"Reddit";
+    }
+    return self;
+}
+
 - (id)initForLink:(NSString *)string{
+    imgurString = nil;
     _shouldPostPhoto = NO;
     _linkToPost = string;
     if(self = [super initWithStyle:UITableViewStyleGrouped]){
@@ -119,12 +132,12 @@ static int kLoginButtonTag = 420;
 
     // navi buttons
     UIBarButtonItem *btn;
-    if (self.shouldPostPhoto) {
-    btn = [[UIBarButtonItem alloc]
+    if (self.shouldPostPhoto && imgurString == nil) {
+        btn = [[UIBarButtonItem alloc]
            initWithTitle:NSLocalizedString(@"MF_POST", @"")
            style:UIBarButtonItemStyleBordered
            target:self
-           action:@selector(uploadToImgur)];
+               action:@selector(uploadToImgur:)];
     }else{
         btn = [[UIBarButtonItem alloc]
                initWithTitle:NSLocalizedString(@"MF_POST", @"")
@@ -227,21 +240,26 @@ static int kLoginButtonTag = 420;
 
 #pragma mark Reddit Guts
 
-- (void)postPhotoToReddit:(NSString*)imgLink
+- (void)postPhotoToReddit
 {
-    
-    if (![imgLink isKindOfClass:[NSString class]]) {
-        imgLink = imgurString;
-    }
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [_alien startAnimating];
     });
     
-    NSString *subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    NSString *subreddit;
+    if (self.subreddit) {
+        subreddit = self.subreddit;
+    }else{
+        subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    }
     
-    NSString *title = [[NSString alloc]initWithString:self.textView.text];
-    
+    NSString *title;
+    if (self.title) {
+        title = self.title;
+    }else{
+        title = [[NSString alloc]initWithString:self.textView.text];
+    }
     
     NSString *urlString = [NSString stringWithFormat:@"http://www.reddit.com/api/submit"];
     NSURL *url = [NSURL URLWithString:urlString];
@@ -249,7 +267,7 @@ static int kLoginButtonTag = 420;
 
     [request setHTTPMethod:@"POST"];
     
-    NSString*httpBody = [NSString stringWithFormat:@"uh=%@&url=%@&kind=link&sr=%@&title=%@&r=%@&api_type=json",self.modhash, imgLink, [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+    NSString*httpBody = [NSString stringWithFormat:@"uh=%@&url=%@&kind=link&sr=%@&title=%@&r=%@&api_type=json",self.modhash, imgurString, [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding], [subreddit stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
     
     
     [request setHTTPBody:[httpBody dataUsingEncoding:NSASCIIStringEncoding]];
@@ -268,9 +286,20 @@ static int kLoginButtonTag = 420;
         [_alien startAnimating];
     });
     
-    NSString *subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    NSString *subreddit;
+    if (self.subreddit) {
+        subreddit = self.subreddit;
+    }else{
+        subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    }
     
-    NSString *title = [[NSString alloc]initWithString:self.textView.text];
+    NSString *title;
+    if (self.title) {
+        title = self.title;
+    }else{
+        title = [[NSString alloc]initWithString:self.textView.text];
+    }
+
     
     
     NSString *urlString = [NSString stringWithFormat:@"http://www.reddit.com/api/submit"];
@@ -432,19 +461,28 @@ static int kLoginButtonTag = 420;
     }
 }
 
-- (void)uploadToImgur
+- (void)uploadToImgur:(UIImage*)imageToUpload
 {
     [UIView animateWithDuration:.3 animations:^{
         [self.progressView setAlpha:1];
     }];
     
-    NSString *subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    NSString *subreddit;
+    if (self.subreddit) {
+        subreddit = self.subreddit;
+    }else{
+        subreddit = [[NSString alloc]initWithString:[(UILabel*)[self.subredditField viewWithTag:kSubredditLabelTag]text]];
+    }
     
     NSURL*srURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://reddit.com/r/%@", subreddit]];
     
     [srURL resourceExistsCompletionBlock:^(BOOL available) {
         if (available) {
-            [uploader uploadImage:self.originalImage];
+            if ([imageToUpload isKindOfClass:[UIImage class]]) {
+                [uploader uploadImage:imageToUpload];
+            }else{
+                [uploader uploadImage:self.originalImage];
+            }
         }else{
             [self.progressView setAlpha:0];
             
@@ -753,7 +791,7 @@ static int kLoginButtonTag = 420;
         [_alien performSelectorOnMainThread:@selector(startAnimating) withObject:nil waitUntilDone:NO];
     }];
     imgurString = urlString;
-	[self postPhotoToReddit:urlString];
+	[self postPhotoToReddit];
 }
 
 -(void)uploadFailedWithError:(NSError *)error
