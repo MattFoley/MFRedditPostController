@@ -25,16 +25,16 @@
     NSString*imgurString;
 }
 
-@property (nonatomic, retain) UIImage *originalImage;
-@property (nonatomic, retain) UIImage *thumbnailImage;
+@property (nonatomic, strong) UIImage *originalImage;
+@property (nonatomic, strong) UIImage *thumbnailImage;
 
-@property (nonatomic, retain) ImgurUploader *uploader;
-@property (nonatomic, retain) UIProgressView *progressView;
+@property (nonatomic, strong) ImgurUploader *uploader;
+@property (nonatomic, strong) UIProgressView *progressView;
 
-@property (nonatomic, retain) NSString* subreddit;
-@property (nonatomic, retain) NSString* title;
+@property (nonatomic, strong) NSString* subreddit;
+@property (nonatomic, strong) NSString* title;
 
-@property (nonatomic, retain) NSString* linkToPost;
+@property (nonatomic, strong) NSString* linkToPost;
 
 - (id)initForPhoto;
 - (id)initWithImageLink:(NSString*)photoLink;

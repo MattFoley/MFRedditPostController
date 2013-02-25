@@ -33,9 +33,7 @@
     
     UINavigationController *n = [[UINavigationController alloc] initWithRootViewController:c];
     n.modalPresentationStyle = UIModalPresentationFormSheet;
-    [c release];
     [self presentModalViewController:n animated:YES];
-    [n release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation{

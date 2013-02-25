@@ -17,7 +17,7 @@
 
 @interface ImgurUploader : NSObject <NSXMLParserDelegate> 
 {
-	id<ImgurUploaderDelegate> delegate;
+	id<ImgurUploaderDelegate> __weak delegate;
 	NSMutableData *receivedData;
 	NSString* imageURL;
 	NSString* currentNode;
@@ -27,7 +27,7 @@
 
 -(void)uploadImage:(UIImage*)image;
 
-@property (assign) id<ImgurUploaderDelegate> delegate;
+@property (weak) id<ImgurUploaderDelegate> delegate;
 
 
 @end

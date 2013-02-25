@@ -16,12 +16,13 @@
     NSHTTPURLResponse* response = nil;
     NSError* error = nil;
     [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    NSLog(@"statusCode = %d", [response statusCode]);
     
-    if ([response statusCode] == 404)
+    NSLog(@"statusCode = %d", [response statusCode]);
+    if ([response statusCode] == 404) {
         completion(NO);
-    else
+    } else {
         completion(YES);
+    }
 }
 
 @end

@@ -7,7 +7,7 @@
 
 @interface AppDelegate()
 
-@property (nonatomic, retain) MainController *mainCtrl;
+@property (nonatomic, strong) MainController *mainCtrl;
 
 @end
 
@@ -18,18 +18,16 @@
 @synthesize mainCtrl    = _mainCtrl;
 
 - (void)dealloc{
-    [_mainCtrl release], _mainCtrl = nil;
-    [_window release], _window = nil;
-    [super dealloc];
+    _mainCtrl = nil;
+    _window = nil;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions{
-    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor whiteColor];
     
     MainController *c = [[MainController alloc] init];
     self.mainCtrl = c;
-    [c release];
     
     [self.window addSubview:self.mainCtrl.view];    
     [self.window makeKeyAndVisible];

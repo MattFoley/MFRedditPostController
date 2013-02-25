@@ -38,10 +38,10 @@
 			[request setValue:[NSString stringWithFormat:@"%d",[uploadCall length]] forHTTPHeaderField:@"Content-length"];
 			[request setHTTPBody:[uploadCall dataUsingEncoding:NSUTF8StringEncoding]];
 			
-			NSURLConnection *theConnection=[[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];
+			NSURLConnection *theConnection=[[NSURLConnection alloc] initWithRequest:request delegate:self];
 			if (theConnection) 
 			{
-				receivedData=[[NSMutableData data] retain];
+				receivedData=[NSMutableData data];
 			} 
 			else 
 			{
@@ -53,11 +53,6 @@
 }
 
 
--(void)dealloc
-{
-	[super dealloc];
-	[imageURL release];
-}
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
@@ -109,7 +104,7 @@
 {
 	if( [currentNode isEqualToString:@"original"] )
 	{
-		imageURL = [string retain];
+		imageURL = string;
 	}
 }
 

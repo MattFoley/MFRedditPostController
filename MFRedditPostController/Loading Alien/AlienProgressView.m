@@ -32,10 +32,8 @@
 	
 	[imageView setImage:[UIImage imageNamed:@"Loading0.png"]];
 	
-	images = [[NSArray alloc] initWithObjects:
-			  [UIImage imageNamed:@"Loading4.png"],
-			  [UIImage imageNamed:@"Loading3.png"],
-			  nil];
+	images = @[[UIImage imageNamed:@"Loading4.png"],
+			  [UIImage imageNamed:@"Loading3.png"]];
 	
 	[self addSubview:imageView];
 	
@@ -61,11 +59,14 @@
 	switch (status)
 	{
 		case 0:
+        {
 			status = 1;
 			[imageView setImage:[UIImage imageNamed:@"Loading1.png"]];
 			[NSTimer scheduledTimerWithTimeInterval:.15 target:self selector:@selector(updateAnimation) userInfo:nil repeats:NO];
 			break;
+        }
 		case 1:
+        {
 			status = 2;
             dispatch_async(dispatch_get_main_queue(), ^{
                     [imageView setImage:[UIImage imageNamed:@"Loading2.png"]];
@@ -73,17 +74,21 @@
 			
 			[NSTimer scheduledTimerWithTimeInterval:.15 target:self selector:@selector(updateAnimation) userInfo:nil repeats:NO];
 			break;
+        }
 		case 2:
+        {
             status = 3;
             [imageView setImage:[UIImage imageNamed:@"Loading3.png"]];
 			[imageView setAnimationImages:images];
 			[imageView setAnimationDuration:.6];
             [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(updateAnimation) userInfo:nil repeats:NO];
 			break;
+        }
         case 3:
+        {
             [imageView startAnimating];
             break;
-        
+        }
 		default:
 			break;
 	}
@@ -110,13 +115,6 @@
 	return isAnimating;
 }
 
-- (void)dealloc 
-{
-	[imageView release];
-	[images release];
-
-    [super dealloc];
-}
 
 
 @end
